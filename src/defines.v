@@ -1,6 +1,7 @@
-
 `define RstEnable               1'b1
 `define RstDisable              1'b0
+`define WriteEnable             1'b1
+`define WriteDisable            1'b0
 
 // bus
 `define InstAddrBus             31:0
@@ -27,6 +28,7 @@
 `define R_OP                    7'b0110011
 
 // func3
+`define NON_FUNC3               3'b000
 `define JALR_FUNC3              3'b000
 `define BEQ_FUNC3               3'b000
 `define BNE_FUNC3               3'b001
@@ -63,6 +65,7 @@
 `define AND_FUNC3               3'b111
 
 // func7
+`define NON_FUNC7               7'b0000000
 `define SLLI_FUNC7              7'b0000000
 `define SRLI_FUNC7              7'b0000000
 `define SRAI_FUNC7              7'b0100000
