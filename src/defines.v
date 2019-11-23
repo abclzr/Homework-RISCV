@@ -2,6 +2,12 @@
 `define RstDisable              1'b0
 `define WriteEnable             1'b1
 `define WriteDisable            1'b0
+`define ReadEnable              1'b1
+`define ReadDisable             1'b0
+`define BranchEnable            1'b1
+`define BranchDisable           1'b0
+`define ZeroWord                32'h00000000
+`define ZeroRegAddr             5'b0000000
 
 // bus
 `define InstAddrBus             31:0
