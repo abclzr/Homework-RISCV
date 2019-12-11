@@ -8,6 +8,8 @@
 `define BranchDisable           1'b0
 `define ZeroWord                32'h00000000
 `define ZeroRegAddr             5'b0000000
+`define RegNum                  32
+`define RegNumLog2              5
 
 // bus
 `define InstAddrBus             31:0
