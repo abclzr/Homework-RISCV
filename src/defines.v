@@ -7,9 +7,12 @@
 `define BranchEnable            1'b1
 `define BranchDisable           1'b0
 `define ZeroWord                32'h00000000
+`define ZeroByte                8'b00000000
 `define ZeroRegAddr             5'b00000
 `define RegNum                  32
 `define RegNumLog2              5
+`define True_v                  1'b1
+`define False_v                 1'b0
 
 // bus
 `define InstAddrBus             31:0
@@ -22,6 +25,8 @@
 `define Func3Bus                2:0
 `define Func7Bus                6:0
 `define StallBus                6:0
+`define MemAddrBus              16:0
+`define MemDataBus              7:0
 
 // opcode
 `define NON_OP                  7'b0000000

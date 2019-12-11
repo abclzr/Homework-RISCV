@@ -54,3 +54,5 @@ module id_exe(
             wreg_i              <= wreg_o;
         end
     end
+
+endmodule
