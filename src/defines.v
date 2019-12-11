@@ -7,7 +7,7 @@
 `define BranchEnable            1'b1
 `define BranchDisable           1'b0
 `define ZeroWord                32'h00000000
-`define ZeroRegAddr             5'b0000000
+`define ZeroRegAddr             5'b00000
 `define RegNum                  32
 `define RegNumLog2              5
 

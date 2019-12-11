@@ -36,13 +36,13 @@ module stage_id(
     output reg[`RegBus]         ls_offset_o,
     output reg[`RegBus]         wd_o,
     output reg                  wreg_o,
-    output reg[`RegBus]         imm;
 
     // todo : branch prediction
     output reg                  branch_enable_o,
     output reg                  branch_addr_o,
 );
 
+    reg [`RegBus]                   imm;
     wire [`OpcodeBus]               opcode = inst_i[6:0];
     wire [`Func3Bus]                func3 = inst_i[14:12];
     wire [`Func7Bus]                func7 = inst_i[31:25];
