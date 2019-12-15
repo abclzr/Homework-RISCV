@@ -2,6 +2,7 @@
 module stage_id(
     // from if_id
     input wire                  rst,
+    input wire                  rdy,
 
     input wire[`InstAddrBus]    pc_i,
     input wire[`InstBus]        inst_i,

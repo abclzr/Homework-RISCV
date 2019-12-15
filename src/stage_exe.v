@@ -1,6 +1,8 @@
 `include "defines.v"
 module stage_exe(
     input wire                  rst,
+    input wire                  rdy,
+
 
     input wire[`OpcodeBus]      opcode_i,
     input wire[`Func3Bus]       func3_i,
