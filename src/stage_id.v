@@ -40,7 +40,7 @@ module stage_id(
 
     // todo : branch prediction
     output reg                  branch_enable_o,
-    output reg[`InstAddrBus]    branch_addr_o,
+    output reg[`InstAddrBus]    branch_addr_o
 );
 
     reg [`RegBus]                   imm;

@@ -20,26 +20,26 @@ module mcu(
     always @ ( * ) begin
         if (rst) begin
             write_enable_o          <= `WriteDisable;
-            addr_o                  <= `MemAddrBus'b0;
+            addr_o                  <= 17'b0;
             data_o                  <= `ZeroByte;
             if_req_stall            <= `False_v;
             mem_req_stall           <= `False_v;
         end else if (mem_require) begin
             write_enable_o          <= mem_write_enable;
-            addr_o                  <= mem_addr;
+            addr_o                  <= mem_addr[16:0];
             data_o                  <= mem_data;
             if_req_stall            <= `False_v;
             mem_req_stall           <= `True_v;
         end else if (if_require) begin
             write_enable_o          <= `WriteDisable;
-            addr_o                  <= if_addr;
+            addr_o                  <= if_addr[16:0];
             data_o                  <= `ZeroByte;
             if_req_stall            <= `True_v;
             mem_req_stall           <= `False_v;
         end else begin
             write_enable_o          <= `WriteDisable;
-            addr_o                  <= `MemAddrBus'b0;
-            data_o                  <= `MemDataBus'b0;
+            addr_o                  <= 17'b0;
+            data_o                  <= `ZeroByte;
             if_req_stall            <= `False_v;
             mem_req_stall           <= `False_v;
         end
