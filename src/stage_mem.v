@@ -1,7 +1,7 @@
 `include "defines.v"
 module stage_mem(
     input wire                  rst,
-    input wire                  rdy,
+    input wire                  clk,
 
     input wire[`OpcodeBus]      opcode_i,
     input wire[`Func3Bus]       func3_i,
@@ -87,7 +87,7 @@ reg[`RegBus] all_data;
                             `LB_FUNC3, `LBU_FUNC3: begin
                                 state                   <= 3'b010;
                             end
-                            `LH_FUNCT3, `LHU_FUNCT3, `LW_FUNCT3: begin
+                            `LH_FUNC3, `LHU_FUNC3, `LW_FUNC3: begin
                                 mem_addr_o              <= mem_addr_i + 1;
                                 state                   <= 3'b010;
                             end
@@ -123,11 +123,11 @@ reg[`RegBus] all_data;
                                 mem_addr_o              <= `ZeroWord;
                                 state                   <= 3'b000;
                             end
-                            `LH_FUNCT3, `LHU_FUNCT3: begin
+                            `LH_FUNC3, `LHU_FUNC3: begin
                                 data1                   <= mem_data_i;
                                 state                   <= 3'b011;
                             end
-                            `LW_FUNCT3: begin
+                            `LW_FUNC3: begin
                                 data1                   <= mem_data_i;
                                 mem_addr_o              <= mem_addr_i + 2;
                                 state                   <= 3'b011;
@@ -152,19 +152,19 @@ reg[`RegBus] all_data;
                 3'b011: begin
                     if (opcode_i == `L_OP) begin
                         case (func3_i)
-                            `LH_FUNCT3: begin
-                                all_data                <= {{16{mem_data_i[7]}}, mem_data_i, data_block1};
+                            `LH_FUNC3: begin
+                                all_data                <= {{16{mem_data_i[7]}}, mem_data_i, data1};
                                 mem_check_busy          <= `False_v;
                                 mem_data_o              <= `ZeroWord;
                                 state                   <= 3'b000;
                             end
-                            `LHU_FUNCT3: begin
-                                all_data                <= {16'b0, mem_data_i, data_block1};
+                            `LHU_FUNC3: begin
+                                all_data                <= {16'b0, mem_data_i, data1};
                                 mem_check_busy          <= `False_v;
                                 mem_data_o              <= `ZeroWord;
                                 state                   <= 3'b000;
                             end
-                            `LW_FUNCT3: begin
+                            `LW_FUNC3: begin
                                 data2                   <= mem_data_i;
                                 mem_addr_o              <= mem_addr_i + 3;
                                 state                   <= 3'b100;
@@ -183,7 +183,7 @@ reg[`RegBus] all_data;
                 3'b100: begin
                     if (opcode_i == `L_OP) begin
                         case (func3_i)
-                            `LW_FUNCT3: begin
+                            `LW_FUNC3: begin
                                 data3                   <= mem_data_i;
                                 state                   <= 3'b101;
                             end
@@ -201,7 +201,7 @@ reg[`RegBus] all_data;
                 end
                 3'b101: begin
                     if (opcode_i == `L_OP) begin
-                        all_data                <= {mem_data_i, data_block3, data_block2, data_block1};
+                        all_data                <= {mem_data_i, data3, data2, data1};
                         mem_check_busy          <= `False_v;
                         mem_addr_o              <= `ZeroWord;
                         state                   <= 3'b000;

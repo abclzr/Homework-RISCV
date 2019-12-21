@@ -1,7 +1,7 @@
 `include "defines.v"
 module exe_mem(
     input wire                  clk,
-    input wire                  rdy,
+    input wire                  rst,
 
     input wire[`StallBus]       stall,
 
@@ -24,14 +24,14 @@ module exe_mem(
         if (rst) begin
             opcode_i                    <= `NON_OP;
             func3_i                     <= `NON_FUNC3;
-            mem_addr_o                  <= `ZeroWord;
+            mem_addr_i                  <= `ZeroWord;
             wd_i                        <= `ZeroRegAddr;
             wreg_i                      <= `False_v;
             wdata_i                     <= `ZeroWord;
         end else if (stall[4] && !stall[5]) begin            
             opcode_i                    <= `NON_OP;
             func3_i                     <= `NON_FUNC3;
-            mem_addr_o                  <= `ZeroWord;
+            mem_addr_i                  <= `ZeroWord;
             wd_i                        <= `ZeroRegAddr;
             wreg_i                      <= `False_v;
             wdata_i                     <= `ZeroWord;

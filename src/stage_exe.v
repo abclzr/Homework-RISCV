@@ -25,7 +25,7 @@ assign data1_lt_data2 = ((data1_i[31] & !data2_i[31])
                         || ((data1_i[31] == data2_i[31])
                         && (data1_i < data2_i)));
 assign data1_lt_data2_u = data1_i < data2_i;
-assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i >> reg2_i[4:0];
+assign sra_result = ({32{data1_i[31]}} << (6'd32 - {1'b0, data2_i[4:0]})) | data1_i >> data2_i[4:0];
 
     always @ ( * ) begin
         if (rst) begin
@@ -36,11 +36,11 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
             wreg_o              <= `WriteDisable;
             wdata_o             <= `ZeroWord;
         end else begin
-            opcode_o            <= opcode;
+            opcode_o            <= opcode_i;
             func3_o             <= func3_i;
             wd_o                <= wd_i;
-            wreg_o              <= wreg_o;
-            case (opcode)
+            wreg_o              <= wreg_i;
+            case (opcode_i)
                 `NON_OP: begin
                     mem_addr_o      <= `ZeroWord;
                     wdata_o         <= `ZeroWord;
@@ -64,7 +64,7 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
                 `B_OP: begin
                     mem_addr_o      <= `ZeroWord;
                     wdata_o         <= `ZeroWord;
-                    case (func3)
+                    case (func3_i)
                         `BEQ_FUNC3: begin
                         end
                         `BNE_FUNC3: begin
@@ -82,7 +82,7 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
                 `L_OP: begin
                     mem_addr_o      <= data1_i + ls_offset_i;
                     wdata_o         <= `ZeroWord;
-                    case (func3)
+                    case (func3_i)
                         `LB_FUNC3: begin
                         end
                         `LH_FUNC3: begin
@@ -98,7 +98,7 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
                 `S_OP: begin
                     mem_addr_o      <= data1_i + ls_offset_i;
                     wdata_o         <= data2_i;
-                    case (func3)
+                    case (func3_i)
                         `SB_FUNC3: begin
                         end
                         `SH_FUNC3: begin
@@ -109,7 +109,7 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
                 end
                 `I_OP: begin
                     mem_addr_o      <= `ZeroWord;
-                    case (func3)
+                    case (func3_i)
                         `ADDI_FUNC3: begin
                             wdata_o     <= data1_i + data2_i;
                         end
@@ -132,18 +132,19 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
                             wdata_o     <= data1_i << data2_i[4:0];
                         end
                         `SRLI_FUNC3: begin
-                            if (func7 == `NON_FUNC7) begin //srli
-                                wdata_o     <= data1_i >> data2_i[4:0]
+                            if (func7_i == `NON_FUNC7) begin //srli
+                                wdata_o     <= data1_i >> data2_i[4:0];
                             end else begin //srai
-                                wdata_o     <= sra_result;                            end
+                                wdata_o     <= sra_result;
+                            end
                         end
                     endcase
                 end
                 `R_OP: begin
                     mem_addr_o      <= `ZeroWord;
-                    case (func3)
+                    case (func3_i)
                         `ADD_FUNC3: begin
-                            if (func7 == `NON_FUNC7) begin //add
+                            if (func7_i == `NON_FUNC7) begin //add
                                 wdata_o     <= data1_i + data2_i;
                             end else begin //sub
                                 wdata_o     <= data1_i + (~data2_i) + 1;
@@ -162,7 +163,7 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
                             wdata_o     <= data1_i ^ data2_i;
                         end
                         `SRL_FUNC3: begin
-                            if (func7 == `NON_FUNC7) begin //srl
+                            if (func7_i == `NON_FUNC7) begin //srl
                                 wdata_o     <= data1_i >> data2_i[4:0];
                             end else begin //sra
                                 wdata_o     <= sra_result;
@@ -179,3 +180,5 @@ assign sra_result = ({32{reg1_i[31]}} << (6'd32 - {1'b0, reg2_i[4:0]})) | reg1_i
             endcase
         end
     end
+
+endmodule

@@ -44,7 +44,7 @@ reg[`RegBus]    regs[0:`RegNum - 1];
     end
 
     always @ ( * ) begin
-        if (rst ==  RstEnable) begin
+        if (rst == `RstEnable) begin
             rdata2  <= `ZeroWord;
         end else begin
             if (raddr2 == `RegNumLog2'h0) begin

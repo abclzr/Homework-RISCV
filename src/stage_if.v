@@ -1,7 +1,7 @@
 `include "defines.v"
 module stage_if(
     input wire                  rst,
-    input wire                  rdy,
+    input wire                  clk,
     
     // from ctrl
     input wire[`StallBus]       stall,

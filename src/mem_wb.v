@@ -1,7 +1,7 @@
 `include "defines.v"
 module mem_wb(
     input wire                  clk,
-    input wire                  rdy,
+    input wire                  rst,
 
     input wire[`StallBus]       stall,
     
@@ -9,9 +9,9 @@ module mem_wb(
     input wire                  wreg_o,
     input wire[`RegBus]         wdata_o,
     
-    input wire                  we,
-    input wire[`RegAddrBus]     waddr,
-    input wire[`RegBus]         wdata
+    output reg                  we,
+    output reg[`RegAddrBus]     waddr,
+    output reg[`RegBus]         wdata
 );
 
     always @ (posedge clk) begin

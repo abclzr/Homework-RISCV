@@ -235,11 +235,11 @@ module stage_id(
     always @ ( * ) begin
         if (rst == `RstEnable || inst_i == 32'b0) begin
             data1_o <= `ZeroWord;
-        end else if (reg1_read_o == 'ReadDisable) begin
+        end else if (reg1_read_o == `ReadDisable) begin
             data1_o <= imm;
-        end else if (exe_wreg_i == 'WriteEnable && exe_wd_i == reg1_addr_o) begin
+        end else if (exe_wreg_i == `WriteEnable && exe_wd_i == reg1_addr_o) begin
             data1_o <= exe_wdata_i;
-        end else if (mem_wreg_i == 'WriteEnable && mem_wd_i == reg1_addr_o) begin
+        end else if (mem_wreg_i == `WriteEnable && mem_wd_i == reg1_addr_o) begin
             data1_o <= mem_wdata_i;
         end else begin
             data1_o <= data1_i;
@@ -249,11 +249,11 @@ module stage_id(
     always @ ( * ) begin
         if (rst == `RstEnable || inst_i == 32'b0) begin
             data2_o <= `ZeroWord;
-        end else if (reg2_read_o == 'ReadDisable) begin
+        end else if (reg2_read_o == `ReadDisable) begin
             data2_o <= imm;
-        end else if (exe_wreg_i == 'WriteEnable && exe_wd_i == reg2_addr_o) begin
+        end else if (exe_wreg_i == `WriteEnable && exe_wd_i == reg2_addr_o) begin
             data2_o <= exe_wdata_i;
-        end else if (mem_wreg_i == 'WriteEnable && mem_wd_i == reg2_addr_o) begin
+        end else if (mem_wreg_i == `WriteEnable && mem_wd_i == reg2_addr_o) begin
             data2_o <= mem_wdata_i;
         end else begin
             data2_o <= data2_i;

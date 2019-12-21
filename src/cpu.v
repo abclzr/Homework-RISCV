@@ -1,6 +1,6 @@
 // RISCV32I CPU top module
 // port modification allowed for debugging purposes
-`include defines.v
+`include "defines.v"
 module cpu(
     input  wire                 clk_in,			// system clock signal
     input  wire                 rst_in,			// reset signal
@@ -26,29 +26,83 @@ module cpu(
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
 
-always @(posedge clk_in)
-  begin
-    if (rst_in)
-      begin
-      
-      end
-    else if (!rdy_in)
-      begin
-      
-      end
-    else
-      begin
-      
-      end
-  end
-
-
 wire                if_branch_enable_i;
 wire[`InstAddrBus]  if_branch_addr_i;
 
+wire[`InstAddrBus]  if_pc_o;
+wire[`InstBus]      if_inst_o;
+
+
+wire[`InstAddrBus]  id_pc_i;
+wire[`InstBus]      id_inst_i;
+
+wire[`RegBus]       id_data1_i;
+wire[`RegBus]       id_data2_i;
+
+
+wire[`OpcodeBus]    id_opcode_o;
+wire[`Func3Bus]     id_func3_o;
+wire[`Func7Bus]     id_func7_o;
+wire[`RegBus]       id_data1_o;
+wire[`RegBus]       id_data2_o;
+wire[`RegBus]       id_ls_offset_o;
+wire[`RegBus]       id_wd_o;
+wire                id_wreg_o;
+
+wire[`OpcodeBus]    exe_opcode_i;
+wire[`Func3Bus]     exe_func3_i;
+wire[`Func7Bus]     exe_func7_i;
+wire[`RegBus]       exe_data1_i;
+wire[`RegBus]       exe_data2_i;
+wire[`RegBus]       exe_ls_offset_i;
+wire[`RegAddrBus]   exe_wd_i;
+wire                exe_wreg_i;
+
+
+wire[`OpcodeBus]    exe_opcode_o;
+wire[`Func3Bus]     exe_func3_o;
+wire[`RegBus]       exe_mem_addr_o;
+wire[`RegAddrBus]   exe_wd_o;
+wire                exe_wreg_o;
+wire[`RegBus]       exe_wdata_o;
+
+
+wire[`OpcodeBus]    mem_opcode_i;
+wire[`Func3Bus]     mem_func3_i;
+wire[`RegBus]       mem_mem_addr_i;
+wire[`RegAddrBus]   mem_wd_i;
+wire                mem_wreg_i;
+wire[`RegBus]       mem_wdata_i;
+
+
+wire                mcu_if_require;
+wire                mcu_mem_require;
+wire[`InstAddrBus]  mcu_if_addr;
+wire[`InstAddrBus]  mcu_mem_addr;
+wire[`MemDataBus]   mcu_mem_data;
+wire                mcu_mem_write_enable;
+
+
+wire                ctrl_if_stall_req_i;
+wire                ctrl_mem_stall_req_i;
+wire[`StallBus]     ctrl_stall;
+
+wire[`RegAddrBus]   mem_wd_o;
+wire                mem_wreg_o;
+wire[`RegBus]       mem_wdata_o;
+
+wire                id_reg1_read_o;
+wire                id_reg2_read_o;
+wire[`RegAddrBus]   id_reg1_addr_o;
+wire[`RegAddrBus]   id_reg2_addr_o;
+
+wire                regfile_we;
+wire[`RegAddrBus]   regfile_waddr;
+wire[`RegBus]       regfile_wdata;
+
 stage_if stage_if_a(
   .rst(rst_in),
-  .rdy(rdy_in),
+  .clk(clk_in),
   .stall(ctrl_stall),
   .mem_data_i(mem_din),
   .branch_enable_i(if_branch_enable_i),
@@ -59,8 +113,6 @@ stage_if stage_if_a(
   .inst_o(if_inst_o)
 );
 
-wire[`InstAddrBus]  if_pc_o;
-wire[`InstBus]      if_inst_o;
 
 if_id if_id_a(
   .rst(rst_in),
@@ -72,13 +124,7 @@ if_id if_id_a(
   .inst_i(id_inst_i)
 );
 
-wire[`InstAddrBus]  id_pc_i;
-wire[`InstBus]      id_inst_i;
-
-wire[`RegBus]       id_data1_i,
-wire[`RegBus]       id_data2_i,
-
-strage_id stage_id_a(
+stage_id stage_id_a(
   .rst(rst_in),
   .rdy(rdy_in),
   .pc_i(id_pc_i),
@@ -114,14 +160,6 @@ strage_id stage_id_a(
   .branch_addr_o(if_branch_addr_i)
 );
 
-wire[`OpcodeBus]    id_opcode_o;
-wire[`Func3Bus]     id_func3_o;
-wire[`Func7Bus]     id_func7_o;
-wire[`RegBus]       id_data1_o;
-wire[`RegBus]       id_data2_o;
-wire[`RegBus]       id_ls_offset_o;
-wire[`RegBus]       id_wd_o;
-wire                id_wreg_o;
 
 id_exe id_exe_a(
   .rst(rst_in),
@@ -148,14 +186,6 @@ id_exe id_exe_a(
   .wreg_i(exe_wreg_i)
 );
 
-wire[`OpcodeBus]    exe_opcode_i;
-wire[`Func3Bus]     exe_func3_i;
-wire[`Func7Bus]     exe_func7_i;
-wire[`RegBus]       exe_data1_i;
-wire[`RegBus]       exe_data2_i;
-wire[`RegBus]       exe_ls_offset_i;
-wire[`RegAddrBus]   exe_wd_i;
-wire                exe_wreg_i;
 
 stage_exe stage_exe_a(
   .rst(rst_in),
@@ -178,16 +208,10 @@ stage_exe stage_exe_a(
   .wdata_o(exe_wdata_o)
 );
 
-wire[`OpcodeBus]    exe_opcode_o;
-wire[`Func3Bus]     exe_func3_o;
-wire[`RegBus]       exe_mem_addr_o;
-wire[`RegAddrBus]   exe_wd_o;
-wire                exe_wreg_o;
-wire[`RegBus]       exe_wdata_o;
 
 exe_mem exe_mem_a(
   .clk(clk_in),
-  .rdy(rdy_in),
+  .rst(rst_in),
 
   .stall(ctrl_stall),
 
@@ -206,16 +230,10 @@ exe_mem exe_mem_a(
   .wdata_i(mem_wdata_i)
 );
 
-wire[`OpcodeBus]    mem_opcode_i,
-wire[`Func3Bus]     mem_func3_i,
-wire[`RegBus]       mem_mem_addr_i,
-wire[`RegAddrBus]   mem_wd_i,
-wire                mem_wreg_i,
-wire[`RegBus]       mem_wdata_i,
 
 stage_mem stage_mem_a(
   .rst(rst_in),
-  .rdy(rdy_in),
+  .clk(clk_in),
 
   .opcode_i(mem_opcode_i),
   .func3_i(mem_func3_i),
@@ -236,12 +254,6 @@ stage_mem stage_mem_a(
   .mem_data_o(mcu_mem_data)
 );
 
-wire                mcu_if_require;
-wire                mcu_mem_require;
-wire[`InstAddrBus]  mcu_if_addr,
-wire[`InstAddrBus]  mcu_mem_addr,
-wire[`MemDataBus]   mcu_mem_data,
-wire                mcu_mem_write_enable,
 
 mcu mcu_a(
   .rst(rst_in),
@@ -261,10 +273,6 @@ mcu mcu_a(
   .mem_req_stall(ctrl_mem_stall_req_i)
 );
 
-wire                ctrl_if_stall_req_i;
-wire                ctrl_mem_stall_req_i;
-wire[`StallBus]     ctrl_stall;
-
 ctrl ctrl_a(
   .rst(rst_in),
   .rdy(rdy_in),
@@ -275,13 +283,9 @@ ctrl ctrl_a(
   .stall(ctrl_stall)
 );
 
-wire[`RegAddrBus]   mem_wd_o;
-wire                mem_wreg_o;
-wire[`RegBus]       mem_wdata_o;
-
 mem_wb mem_wb_a(
   .clk(clk_in),
-  .rdy(rdy_in),
+  .rst(rst_in),
 
   .stall(ctrl_stall),
     
@@ -293,15 +297,6 @@ mem_wb mem_wb_a(
   .waddr(regfile_waddr),
   .wdata(regfile_wdata)
 );
-
-wire                id_reg1_read_o;
-wire                id_reg2_read_o;
-wire[`RegAddrBus]   id_reg1_addr_o;
-wire[`RegAddrBus]   id_reg2_addr_o;
-
-wire                regfile_we;
-wire[`RegAddrBus]   regfile_waddr;
-wire[`RegBus]       regfile_wdata;
 
 regfile regfile_a(
   .clk(clk_in),
