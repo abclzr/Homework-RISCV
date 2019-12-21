@@ -10,7 +10,7 @@ module mcu(
     input wire                  mem_write_enable,
 
     output reg                  write_enable_o,
-    output reg[`MemAddrBus]     addr_o,
+    output reg[`InstAddrBus]    addr_o,
     output reg[`MemDataBus]     data_o,
 
     output reg                  if_req_stall,
@@ -20,25 +20,25 @@ module mcu(
     always @ ( * ) begin
         if (rst) begin
             write_enable_o          <= `WriteDisable;
-            addr_o                  <= 17'b0;
+            addr_o                  <= `ZeroByte;
             data_o                  <= `ZeroByte;
             if_req_stall            <= `False_v;
             mem_req_stall           <= `False_v;
         end else if (mem_require) begin
             write_enable_o          <= mem_write_enable;
-            addr_o                  <= mem_addr[16:0];
+            addr_o                  <= mem_addr;
             data_o                  <= mem_data;
             if_req_stall            <= `False_v;
             mem_req_stall           <= `True_v;
         end else if (if_require) begin
             write_enable_o          <= `WriteDisable;
-            addr_o                  <= if_addr[16:0];
+            addr_o                  <= if_addr;
             data_o                  <= `ZeroByte;
             if_req_stall            <= `True_v;
             mem_req_stall           <= `False_v;
         end else begin
             write_enable_o          <= `WriteDisable;
-            addr_o                  <= 17'b0;
+            addr_o                  <= `ZeroByte;
             data_o                  <= `ZeroByte;
             if_req_stall            <= `False_v;
             mem_req_stall           <= `False_v;

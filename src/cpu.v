@@ -277,8 +277,8 @@ ctrl ctrl_a(
   .rst(rst_in),
   .rdy(rdy_in),
 
-  .if_stall_req_i(ctrl_mem_stall_req_i),
-  .mem_stall_req_i(ctrl_if_stall_req_i),
+  .if_stall_req_i(ctrl_if_stall_req_i),
+  .mem_stall_req_i(ctrl_mem_stall_req_i),
 
   .stall(ctrl_stall)
 );
@@ -301,6 +301,7 @@ mem_wb mem_wb_a(
 regfile regfile_a(
   .clk(clk_in),
   .rst(rst_in),
+  .rdy(rdy_in),
   .we(regfile_we),
   .waddr(regfile_waddr),
   .wdata(regfile_wdata),
