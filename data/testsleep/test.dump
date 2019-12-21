@@ -1,0 +1,64 @@
+
+./test/test.om:     file format elf32-littleriscv
+
+
+Disassembly of section .rom:
+
+00000000 <.rom>:
+   0:	00020137          	lui	sp,0x20
+   4:	7fd000ef          	jal	ra,1000 <main>
+   8:	0ff00513          	li	a0,255
+   c:	000306b7          	lui	a3,0x30
+  10:	00a68223          	sb	a0,4(a3) # 30004 <__heap_start+0x2e004>
+  14:	ff9ff06f          	j	c <main-0xff4>
+
+Disassembly of section .text.startup:
+
+00001000 <main>:
+    1000:	000307b7          	lui	a5,0x30
+    1004:	0047c703          	lbu	a4,4(a5) # 30004 <__heap_start+0x2e004>
+    1008:	0057c703          	lbu	a4,5(a5)
+    100c:	0067c703          	lbu	a4,6(a5)
+    1010:	0077c703          	lbu	a4,7(a5)
+    1014:	0047c583          	lbu	a1,4(a5)
+    1018:	0057c703          	lbu	a4,5(a5)
+    101c:	0067c603          	lbu	a2,6(a5)
+    1020:	0077c683          	lbu	a3,7(a5)
+    1024:	00871793          	slli	a5,a4,0x8
+    1028:	01061713          	slli	a4,a2,0x10
+    102c:	01869693          	slli	a3,a3,0x18
+    1030:	00e6e6b3          	or	a3,a3,a4
+    1034:	00b6e6b3          	or	a3,a3,a1
+    1038:	000115b7          	lui	a1,0x11
+    103c:	00f6e6b3          	or	a3,a3,a5
+    1040:	00030637          	lui	a2,0x30
+    1044:	16f58593          	addi	a1,a1,367 # 1116f <__heap_start+0xf16f>
+    1048:	00464883          	lbu	a7,4(a2) # 30004 <__heap_start+0x2e004>
+    104c:	00564503          	lbu	a0,5(a2)
+    1050:	00664783          	lbu	a5,6(a2)
+    1054:	00764703          	lbu	a4,7(a2)
+    1058:	00851513          	slli	a0,a0,0x8
+    105c:	01079813          	slli	a6,a5,0x10
+    1060:	01871793          	slli	a5,a4,0x18
+    1064:	0107e7b3          	or	a5,a5,a6
+    1068:	0117e7b3          	or	a5,a5,a7
+    106c:	00a7e7b3          	or	a5,a5,a0
+    1070:	40d787b3          	sub	a5,a5,a3
+    1074:	fcf5fae3          	bgeu	a1,a5,1048 <main+0x48>
+    1078:	00464783          	lbu	a5,4(a2)
+    107c:	00564783          	lbu	a5,5(a2)
+    1080:	00664783          	lbu	a5,6(a2)
+    1084:	00000513          	li	a0,0
+    1088:	00764783          	lbu	a5,7(a2)
+    108c:	00008067          	ret
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	3a434347          	fmsub.d	ft6,ft6,ft4,ft7,rmm
+   4:	2820                	fld	fs0,80(s0)
+   6:	29554e47          	fmsub.s	ft8,fa0,fs5,ft5,rmm
+   a:	3820                	fld	fs0,112(s0)
+   c:	332e                	fld	ft6,232(sp)
+   e:	302e                	fld	ft0,232(sp)
+	...
