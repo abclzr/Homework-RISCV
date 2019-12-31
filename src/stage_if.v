@@ -27,6 +27,7 @@ reg[`InstAddrBus] pc_reg;
 reg[`DataBus] data1;
 reg[`DataBus] data2;
 reg[`DataBus] data3;
+reg[`InstAddrBus] counter;
 
 always @ (posedge clk) begin
     if (rst) begin
@@ -36,6 +37,7 @@ always @ (posedge clk) begin
         inst_o                      <= `ZeroWord;
         state                       <= 5'b00000;
         pc_reg                      <= `ZeroWord;
+        counter                     <= `ZeroWord;
     end else if (branch_enable_i) begin
         mem_req_o                   <= `True_v;
         mem_addr_o                  <= branch_addr_i;
@@ -91,6 +93,8 @@ always @ (posedge clk) begin
                     state                       <= 5'b10101;
                 end else begin
                     inst_o                      <= {mem_data_i, data3, data2, data1};
+                    if (data1[6:0] != `B_OP && data1[6:0] != `S_OP)
+                        counter                     <= counter + 1;
                     pc_o                        <= pc_reg;
                     pc_reg                      <= pc_reg + 4;
                     mem_req_o                   <= `False_v;

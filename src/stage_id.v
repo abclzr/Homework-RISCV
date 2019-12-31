@@ -122,8 +122,8 @@ module stage_id(
                 `B_OP: begin
                     ls_offset_o         <= `ZeroWord;
                     wreg_o              <= `WriteDisable;
-                    reg1_read_o         <= `ReadDisable;
-                    reg2_read_o         <= `ReadDisable;
+                    reg1_read_o         <= `ReadEnable;
+                    reg2_read_o         <= `ReadEnable;
                     branch_enable_o     <= `BranchEnable;
                     case (func3)
                         `BEQ_FUNC3: begin
