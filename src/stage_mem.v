@@ -31,15 +31,10 @@ reg[`RegBus] all_data;
 
     always @ ( * ) begin
         if (rst) begin
-            mem_check_busy          <= `False_v;
-            state                   <= 3'b000;
             wd_o                    <= `ZeroRegAddr;
             wreg_o                  <= `False_v;
             wdata_o                 <= `ZeroWord;
             mem_req_o               <= `False_v;
-            mem_write_enable_o      <= `False_v;
-            mem_addr_o              <= `ZeroWord;
-            mem_data_o              <= `ZeroByte;
         end else begin
             wd_o                    <= wd_i;
             wreg_o                  <= wreg_i;
@@ -60,10 +55,6 @@ reg[`RegBus] all_data;
         if (rst) begin
             mem_check_busy          <= `False_v;
             state                   <= 3'b000;
-            wd_o                    <= `ZeroRegAddr;
-            wreg_o                  <= `False_v;
-            wdata_o                 <= `ZeroWord;
-            mem_req_o               <= `False_v;
             mem_write_enable_o      <= `False_v;
             mem_addr_o              <= `ZeroWord;
             mem_data_o              <= `ZeroByte;

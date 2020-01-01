@@ -84,6 +84,8 @@ wire                mcu_mem_write_enable;
 
 
 wire                ctrl_if_stall_req_i;
+wire                ctrl_id_stall_req1_i;
+wire                ctrl_id_stall_req2_i;
 wire                ctrl_mem_stall_req_i;
 wire[`StallBus]     ctrl_stall;
 
@@ -157,7 +159,10 @@ stage_id stage_id_a(
   .wreg_o(id_wreg_o),
 
   .branch_enable_o(if_branch_enable_i),
-  .branch_addr_o(if_branch_addr_i)
+  .branch_addr_o(if_branch_addr_i),
+
+  .id_stall_req1_o(ctrl_id_stall_req1_i),
+  .id_stall_req2_o(ctrl_id_stall_req2_i)
 );
 
 
@@ -278,6 +283,8 @@ ctrl ctrl_a(
   .rdy(rdy_in),
 
   .if_stall_req_i(ctrl_if_stall_req_i),
+  .id_stall_req1_i(ctrl_id_stall_req1_i),
+  .id_stall_req2_i(ctrl_id_stall_req2_i),
   .mem_stall_req_i(ctrl_mem_stall_req_i),
 
   .stall(ctrl_stall)

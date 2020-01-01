@@ -46,17 +46,18 @@ always @ (posedge clk) begin
     end else begin
         case (state)
             5'b00000: begin
-                mem_req_o                   <= `True_v;
-                if (stall[0]) begin
+                if (stall[2]) begin
                     state                       <= 5'b00000;
                 end else begin
+                    mem_req_o                   <= `True_v;
                     mem_addr_o                  <= pc_reg;
                     state                       <= 5'b00001;
                 end
             end
             5'b00001: begin
                 if (stall[0]) begin
-                    state                       <= 5'b10001;
+                    mem_addr_o                  <= pc_reg;
+                    state                       <= 5'b00001;
                 end else begin
                     mem_addr_o                  <= pc_reg + 1;
                     state                       <= 5'b00010;
@@ -64,7 +65,9 @@ always @ (posedge clk) begin
             end
             5'b00010: begin
                 if (stall[0]) begin
-                    state                       <= 5'b10010;
+                    data1                       <= mem_data_i;
+                    mem_addr_o                  <= pc_reg + 1;
+                    state                       <= 5'b01010;
                 end else begin
                     data1                       <= mem_data_i;
                     mem_addr_o                  <= pc_reg + 2;
@@ -73,7 +76,9 @@ always @ (posedge clk) begin
             end
             5'b00011: begin
                 if (stall[0]) begin
-                    state                       <= 5'b10011;
+                    data2                       <= mem_data_i;
+                    mem_addr_o                  <= pc_reg + 2;
+                    state                       <= 5'b01011;
                 end else begin
                     data2                       <= mem_data_i;
                     mem_addr_o                  <= pc_reg + 3;
@@ -82,79 +87,49 @@ always @ (posedge clk) begin
             end
             5'b00100: begin
                 if (stall[0]) begin
-                    state                       <= 5'b10100;
+                    data3                       <= mem_data_i;
+                    mem_addr_o                  <= pc_reg + 3;
+                    state                       <= 5'b01100;
                 end else begin
                     data3                       <= mem_data_i;
                     state                       <= 5'b00101;
                 end
             end
             5'b00101: begin
-                if (stall[0]) begin
-                    state                       <= 5'b10101;
-                end else begin
-                    inst_o                      <= {mem_data_i, data3, data2, data1};
-                    if (data1[6:0] != `B_OP && data1[6:0] != `S_OP)
-                        counter                     <= counter + 1;
-                    pc_o                        <= pc_reg;
-                    pc_reg                      <= pc_reg + 4;
-                    mem_req_o                   <= `False_v;
-                    state                       <= 5'b00000;
-                end
-            end
-            
-            5'b10001: begin
-                if (!stall[0]) begin
-                    mem_addr_o                  <= pc_reg;
-                    state                       <= 5'b00001;
-                end
-            end
-            5'b10010: begin
-                if (!stall[0]) begin
-                    mem_addr_o                  <= pc_reg;
-                    state                       <= 5'b01010;
-                end
-            end
-            5'b10011: begin
-                if (!stall[0]) begin
-                    mem_addr_o                  <= pc_reg + 1;
-                    state                       <= 5'b01011;
-                end
-            end
-            5'b10100: begin
-                if (!stall[0]) begin
-                    mem_addr_o                  <= pc_reg + 2;
-                    state                       <= 5'b01100;
-                end
-            end
-            5'b10101: begin
-                if (!stall[0]) begin
-                    mem_addr_o                  <= pc_reg + 3;
-                    state                       <= 5'b01101;
-                end
+                inst_o                      <= {mem_data_i, data3, data2, data1};
+                if (data1[6:0] != `B_OP && data1[6:0] != `S_OP)
+                    counter                     <= counter + 1;
+                pc_o                        <= pc_reg;
+                pc_reg                      <= pc_reg + 4;
+                mem_req_o                   <= `False_v;
+                state                       <= 5'b00000;
             end
 
             5'b01010: begin
                 if (stall[0]) begin
-                    state                       <= 5'b10010;
-                end else begin
                     mem_addr_o                  <= pc_reg + 1;
-                    state                       <= 5'b00010;
-                end
-            end
-            5'b01011: begin
-                if (stall[0]) begin
-                    state                       <= 5'b10011;
+                    state                       <= 5'b01010;
                 end else begin
                     mem_addr_o                  <= pc_reg + 2;
                     state                       <= 5'b00011;
                 end
             end
-            5'b01100: begin
+            5'b01011: begin
                 if (stall[0]) begin
-                    state                       <= 5'b10100;
+                    mem_addr_o                  <= pc_reg + 2;
+                    state                       <= 5'b01011;
                 end else begin
                     mem_addr_o                  <= pc_reg + 3;
                     state                       <= 5'b00100;
+                end
+            end
+            5'b01100: begin
+                if (stall[0]) begin
+                    mem_addr_o                  <= pc_reg + 3;
+                    state                       <= 5'b10100;
+                end else begin
+                    mem_addr_o                  <= pc_reg + 3;
+                    state                       <= 5'b00101;
                 end
             end
             5'b01101: begin

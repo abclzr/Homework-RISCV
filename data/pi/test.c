@@ -1,9 +1,9 @@
 #include "io.h"
 int f[2801];
 int main() {
-	int a = 1000;
+	int a = 10000;
 	int b = 0;
-	int c = 280;
+	int c = 2800;
 	int d = 0;
 	int e = 0;
 	int g = 0;

@@ -40,7 +40,10 @@ module stage_id(
 
     // todo : branch prediction
     output reg                  branch_enable_o,
-    output reg[`InstAddrBus]    branch_addr_o
+    output reg[`InstAddrBus]    branch_addr_o,
+
+    output reg                  id_stall_req1_o,
+    output reg                  id_stall_req2_o
 );
 
     reg [`RegBus]                   imm;
@@ -48,6 +51,7 @@ module stage_id(
     wire [`Func3Bus]                func3 = inst_i[14:12];
     wire [`Func7Bus]                func7 = inst_i[31:25];
     wire [`InstAddrBus]             pc_i_plus_4;
+    wire                            data1_lt_data2;
 
     assign pc_i_plus_4          = pc_i + 32'h4;
     assign data1_lt_data2 = ((data1_o[31] & !data2_o[31]) //need to check
@@ -124,47 +128,58 @@ module stage_id(
                     wreg_o              <= `WriteDisable;
                     reg1_read_o         <= `ReadEnable;
                     reg2_read_o         <= `ReadEnable;
-                    branch_enable_o     <= `BranchEnable;
                     case (func3)
                         `BEQ_FUNC3: begin
                             if (data1_o == data2_o) begin
+                                branch_enable_o     <= `BranchEnable;
                                 branch_addr_o   <= {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0} + pc_i;
                             end else begin
+                                branch_enable_o     <= `BranchDisable;
                                 branch_addr_o   <= pc_i_plus_4;
                             end
                         end
                         `BNE_FUNC3: begin
                             if (data1_o != data2_o) begin
+                                branch_enable_o     <= `BranchEnable;
                                 branch_addr_o   <= {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0} + pc_i;
                             end else begin
+                                branch_enable_o     <= `BranchDisable;
                                 branch_addr_o   <= pc_i_plus_4;
                             end
                         end
                         `BLT_FUNC3: begin
                             if (data1_lt_data2) begin
+                                branch_enable_o     <= `BranchEnable;
                                 branch_addr_o   <= {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0} + pc_i;
                             end else begin
+                                branch_enable_o     <= `BranchDisable;
                                 branch_addr_o   <= pc_i_plus_4;
                             end
                         end
                         `BGE_FUNC3: begin
                             if (!data1_lt_data2) begin
+                                branch_enable_o     <= `BranchEnable;
                                 branch_addr_o   <= {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0} + pc_i;
                             end else begin
+                                branch_enable_o     <= `BranchDisable;
                                 branch_addr_o   <= pc_i_plus_4;
                             end
                         end
                         `BLTU_FUNC3: begin
                             if (data1_o < data2_o) begin
+                                branch_enable_o     <= `BranchEnable;
                                 branch_addr_o   <= {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0} + pc_i;
                             end else begin
+                                branch_enable_o     <= `BranchDisable;
                                 branch_addr_o   <= pc_i_plus_4;
                             end
                         end
                         `BGEU_FUNC3: begin
                             if (data1_o >= data2_o) begin
+                                branch_enable_o     <= `BranchEnable;
                                 branch_addr_o   <= {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0} + pc_i;
                             end else begin
+                                branch_enable_o     <= `BranchDisable;
                                 branch_addr_o   <= pc_i_plus_4;
                             end
                         end                        
@@ -235,28 +250,46 @@ module stage_id(
     always @ ( * ) begin
         if (rst == `RstEnable || inst_i == 32'b0) begin
             data1_o <= `ZeroWord;
+            id_stall_req1_o <= `False_v;
         end else if (reg1_read_o == `ReadDisable) begin
             data1_o <= imm;
+            id_stall_req1_o <= `False_v;
+        end else if (reg1_addr_o == `ZeroRegAddr) begin
+            data1_o <= `ZeroWord;
+            id_stall_req1_o <= `False_v;
         end else if (exe_wreg_i == `WriteEnable && exe_wd_i == reg1_addr_o) begin
             data1_o <= exe_wdata_i;
+            if (exe_op_i == `L_OP) id_stall_req1_o <= `True_v;
+            else id_stall_req1_o <= `False_v;
         end else if (mem_wreg_i == `WriteEnable && mem_wd_i == reg1_addr_o) begin
             data1_o <= mem_wdata_i;
+            id_stall_req1_o <= `False_v;
         end else begin
             data1_o <= data1_i;
+            id_stall_req1_o <= `False_v;
         end
     end
 
     always @ ( * ) begin
         if (rst == `RstEnable || inst_i == 32'b0) begin
             data2_o <= `ZeroWord;
+            id_stall_req2_o <= `False_v;
         end else if (reg2_read_o == `ReadDisable) begin
             data2_o <= imm;
+            id_stall_req2_o <= `False_v;
+        end else if (reg2_addr_o == `ZeroRegAddr) begin
+            data2_o <= `ZeroWord;
+            id_stall_req2_o <= `False_v;
         end else if (exe_wreg_i == `WriteEnable && exe_wd_i == reg2_addr_o) begin
             data2_o <= exe_wdata_i;
+            if (exe_op_i == `L_OP) id_stall_req2_o <= `True_v;
+            else id_stall_req2_o <= `False_v;
         end else if (mem_wreg_i == `WriteEnable && mem_wd_i == reg2_addr_o) begin
             data2_o <= mem_wdata_i;
+            id_stall_req2_o <= `False_v;
         end else begin
             data2_o <= data2_i;
+            id_stall_req2_o <= `False_v;
         end
     end
 

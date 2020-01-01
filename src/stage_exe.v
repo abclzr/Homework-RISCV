@@ -21,6 +21,10 @@ module stage_exe(
     output reg[`RegBus]         wdata_o
 );
 
+wire                        data1_lt_data2;
+wire                        data1_lt_data2_u;
+wire[`RegBus]               sra_result;
+
 assign data1_lt_data2 = ((data1_i[31] & !data2_i[31])
                         || ((data1_i[31] == data2_i[31])
                         && (data1_i < data2_i)));
