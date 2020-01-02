@@ -16,7 +16,6 @@
 `define BlockNum                64
 `define ZeroCacheData           32'h00000000
 `define ZeroCacheTag            9'b000000000
-`define ZeroCacheIndex          6'b000000
 `define CacheDataBus            31:0
 `define CacheIndexBus           5:0
 `define CacheTagBus             8:0

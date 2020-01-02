@@ -101,7 +101,6 @@ wire                ctrl_id_stall_req1_i;
 wire                ctrl_id_stall_req2_i;
 wire                ctrl_mem_stall_req_i;
 wire[`StallBus]     ctrl_stall;
-wire                ctrl_if_branch_o;
 
 wire[`RegAddrBus]   mem_wd_o;
 wire                mem_wreg_o;
@@ -116,54 +115,19 @@ wire                regfile_we;
 wire[`RegAddrBus]   regfile_waddr;
 wire[`RegBus]       regfile_wdata;
 
-wire[`CacheIndexBus]cache_index;
-wire[`CacheTagBus]  cache_tag;
-wire                cache_write_bit;
-wire[`CacheIndexBus]cache_write_index;
-wire[`CacheTagBus]  cache_write_tag;
-wire[`CacheDataBus] cache_write_data;
-
-wire                cache_cache_hit;
-wire[`CacheDataBus] cache_cache_data;
-
 stage_if stage_if_a(
   .rst(rst_in),
   .clk(clk_in),
   .stall(ctrl_stall),
   .mem_data_i(mem_din),
-  .branch_enable_i(ctrl_if_branch_o),
+  .branch_enable_i(if_branch_enable_i),
   .branch_addr_i(if_branch_addr_i),
   .mem_req_o(mcu_if_require),
   .mem_addr_o(mcu_if_addr),
   .pc_o(if_pc_o),
-  .inst_o(if_inst_o),
-
-  
-  .index(cache_index),
-  .tag(cache_tag),
-  .write_bit(cache_write_bit),
-  .write_index(cache_write_index),
-  .write_tag(cache_write_tag),
-  .write_data(cache_write_data),
-
-  .cache_hit(cache_cache_hit),
-  .cache_data(cache_cache_data)
+  .inst_o(if_inst_o)
 );
 
-i_cache i_cache_a(
-  .rst(rst_in),
-  .clk(clk_in),
-
-  .index(cache_index),
-  .tag(cache_tag),
-  .write_bit(cache_write_bit),
-  .write_index(cache_write_index),
-  .write_tag(cache_write_tag),
-  .write_data(cache_write_data),
-
-  .cache_hit(cache_cache_hit),
-  .cache_data(cache_cache_data)
-);
 
 if_id if_id_a(
   .rst(rst_in),
@@ -360,8 +324,7 @@ ctrl ctrl_a(
   .id_stall_req2_i(ctrl_id_stall_req2_i),
   .mem_stall_req_i(ctrl_mem_stall_req_i),
 
-  .stall(ctrl_stall),
-  .if_branch_enable_o(ctrl_if_branch_o)
+  .stall(ctrl_stall)
 );
 
 mem_wb mem_wb_a(

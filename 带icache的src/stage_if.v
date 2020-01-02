@@ -19,19 +19,7 @@ module stage_if(
 
     //to if_id
     output reg[`InstAddrBus]    pc_o,
-    output reg[`InstBus]        inst_o,
-
-
-    // i_cache
-    output reg[`CacheIndexBus]  index,
-    output reg[`CacheTagBus]    tag,
-    output reg                  write_bit,
-    output reg[`CacheIndexBus]  write_index,
-    output reg[`CacheTagBus]    write_tag,
-    output reg[`CacheDataBus]   write_data,
-
-    input wire                  cache_hit,
-    input wire[`CacheDataBus]   cache_data
+    output reg[`InstBus]        inst_o
 );
 
 reg[4:0] state;
@@ -39,21 +27,26 @@ reg[`InstAddrBus] pc_reg;
 reg[`DataBus] data1;
 reg[`DataBus] data2;
 reg[`DataBus] data3;
+integer i;
 
+(* ram_style = "registers" *) reg[`CacheDataBus] cache_data[`BlockNum - 1:0];
+(* ram_style = "registers" *) reg[`CacheTagBus] cache_tag[`BlockNum - 1:0];
+(* ram_style = "registers" *) reg cache_valid[`BlockNum - 1:0];
 
-    always @ ( * ) begin
-        if (rst) begin
-            index <= `ZeroCacheIndex;
-            tag <= `ZeroCacheTag;
-        end else if (branch_enable_i) begin
-            index <= branch_addr_i[`getCacheIndex];
-            tag <= branch_addr_i[`getCacheTag];
-        end else begin
-            index <= pc_reg[`getCacheIndex];
-            tag <= pc_reg[`getCacheTag];
-        end
-    end
+wire[`CacheIndexBus] index;
+wire[`CacheTagBus] tag;
+wire[`CacheIndexBus] branch_pc_index;
+wire[`CacheTagBus] branch_pc_tag;
 
+wire cache_hit;
+wire branch_cache_hit;
+
+assign index = pc_reg[`getCacheIndex];
+assign tag = pc_reg[`getCacheTag];
+assign branch_pc_index = branch_addr_i[`getCacheIndex];
+assign branch_pc_tag = branch_addr_i[`getCacheTag];
+assign cache_hit = cache_valid[index] && (cache_tag[index] == tag);
+assign branch_cache_hit = cache_valid[branch_pc_index] && (cache_tag[branch_pc_index] == branch_pc_tag);
 
 always @ (posedge clk) begin
     if (rst) begin
@@ -63,12 +56,13 @@ always @ (posedge clk) begin
         inst_o                      <= `ZeroWord;
         state                       <= 5'b00000;
         pc_reg                      <= `ZeroWord;
-        write_bit                   <= `False_v;
-     end else if (branch_enable_i) begin
-        write_bit                   <= `False_v;
-        if (`False_v) begin
+        for (i = 0; i < `BlockNum; i = i + 1) begin
+            cache_valid[i]              <= 1'b0;
+        end
+    end else if (branch_enable_i && !stall[3]) begin
+        if (branch_cache_hit) begin
             mem_req_o                   <= `False_v;
-            inst_o                      <= cache_data;
+            inst_o                      <= cache_data[branch_pc_index];
             pc_o                        <= branch_addr_i;
             pc_reg                      <= branch_addr_i + 4;
             state                       <= 5'b00000;
@@ -81,13 +75,12 @@ always @ (posedge clk) begin
     end else begin
         case (state)
             5'b00000: begin
-                write_bit                   <= `False_v;
                 if (stall[2]) begin
                     state                       <= 5'b00000;
                 end else begin
-                    if (`False_v) begin
+                    if (cache_hit) begin
                         mem_req_o                   <= `False_v;
-                        inst_o                      <= cache_data;
+                        inst_o                      <= cache_data[index];
                         pc_o                        <= pc_reg;
                         pc_reg                      <= pc_reg + 4;
                         state                       <= 5'b00000;
@@ -145,10 +138,9 @@ always @ (posedge clk) begin
                 pc_reg                      <= pc_reg + 4;
                 mem_req_o                   <= `False_v;
                 state                       <= 5'b00000;
-                write_bit                   <= `True_v;
-                write_index                 <= index;
-                write_tag                   <= tag;
-                write_data                  <= {mem_data_i, data3, data2, data1};
+                cache_valid[index]          <= 1'b1;
+                cache_tag[index]            <= tag;
+                cache_data[index]           <= {mem_data_i, data3, data2, data1};
             end
 
             5'b01010: begin

@@ -77,14 +77,48 @@ assign sra_result = ({32{data1_i[31]}} << (6'd32 - {1'b0, data2_i[4:0]})) | data
                 `B_OP: begin
                     mem_addr_o      <= `ZeroWord;
                     wdata_o         <= `ZeroWord;
+                    case (func3_i)
+                        `BEQ_FUNC3: begin
+                        end
+                        `BNE_FUNC3: begin
+                        end
+                        `BLT_FUNC3: begin
+                        end
+                        `BGE_FUNC3: begin
+                        end
+                        `BLTU_FUNC3: begin
+                        end
+                        `BGEU_FUNC3: begin
+                        end                        
+                    endcase
                 end
                 `L_OP: begin
                     mem_addr_o      <= data1_i + ls_offset_i;
                     wdata_o         <= `ZeroWord;
+                    case (func3_i)
+                        `LB_FUNC3: begin
+                        end
+                        `LH_FUNC3: begin
+                        end
+                        `LW_FUNC3: begin
+                        end
+                        `LBU_FUNC3: begin
+                        end
+                        `LBU_FUNC3: begin
+                        end
+                    endcase
                 end
                 `S_OP: begin
                     mem_addr_o      <= data1_i + ls_offset_i;
                     wdata_o         <= data2_i;
+                    case (func3_i)
+                        `SB_FUNC3: begin
+                        end
+                        `SH_FUNC3: begin
+                        end
+                        `SW_FUNC3: begin
+                        end
+                    endcase
                 end
                 `I_OP: begin
                     mem_addr_o      <= `ZeroWord;

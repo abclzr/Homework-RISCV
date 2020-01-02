@@ -9,8 +9,7 @@ module ctrl (
     input wire                  id_stall_req2_i,
     input wire                  mem_stall_req_i,
 
-    output reg[`StallBus]       stall,
-    output reg                  if_branch_enable_o
+    output reg[`StallBus]       stall
 );
 
     always @ ( * ) begin
@@ -26,14 +25,6 @@ module ctrl (
             stall                       <= 7'b0000100;
         end else begin
             stall                       <= 7'b0000000;
-        end
-    end
-
-    always @ ( * ) begin
-        if (rst || stall[3]) begin
-            if_branch_enable_o          <= `False_v;;
-        end else begin
-            if_branch_enable_o          <= id_branch_enable_i;
         end
     end
 
