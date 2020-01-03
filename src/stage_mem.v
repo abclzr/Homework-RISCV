@@ -43,6 +43,8 @@ reg[`DataBus] data1;
 reg[`DataBus] data2;
 reg[`DataBus] data3;
 reg[`RegBus] all_data;
+reg[`InstAddrBus] count_hit;
+reg[`InstAddrBus] count_total;
 
     always @ ( * ) begin
         if (rst) begin
@@ -82,6 +84,8 @@ reg[`RegBus] all_data;
             write_type              <= 3'b000;
             write_addr              <= `ZeroWord;
             write_data              <= `ZeroByte;
+            count_hit               <= `ZeroWord;
+            count_total             <= `ZeroWord;
         end else if (mem_req_o) begin
             case (state)
                 3'b000: begin
@@ -105,6 +109,8 @@ reg[`RegBus] all_data;
                 3'b001: begin
                     if (opcode_i == `L_OP) begin
                         if (cache_hit) begin
+                            count_hit               <= count_hit + 1;
+                            count_total             <= count_total + 1;
                             state                   <= 3'b000;
                             mem_check_busy          <= `False_v;
                             mem_addr_o              <= `ZeroWord;
@@ -126,6 +132,7 @@ reg[`RegBus] all_data;
                                 end
                             endcase
                         end else begin
+                            count_total             <= count_total + 1;
                             case (func3_i)
                                 `LB_FUNC3, `LBU_FUNC3: begin
                                     state                   <= 3'b010;

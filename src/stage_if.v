@@ -39,7 +39,8 @@ reg[`InstAddrBus] pc_reg;
 reg[`DataBus] data1;
 reg[`DataBus] data2;
 reg[`DataBus] data3;
-
+reg[`InstAddrBus] count_hit;
+reg[`InstAddrBus] count_total;
 
     always @ ( * ) begin
         if (rst) begin
@@ -64,6 +65,8 @@ always @ (posedge clk) begin
         state                       <= 5'b00000;
         pc_reg                      <= `ZeroWord;
         write_bit                   <= `False_v;
+        count_hit                   <= `ZeroWord;
+        count_total                 <= `ZeroWord;
      end else if (branch_enable_i) begin
         write_bit                   <= `False_v;
         if (cache_hit) begin
@@ -72,11 +75,14 @@ always @ (posedge clk) begin
             pc_o                        <= branch_addr_i;
             pc_reg                      <= branch_addr_i + 4;
             state                       <= 5'b00000;
+            count_hit                   <= count_hit + 1;
+            count_total                 <= count_total + 1;
         end else begin
             mem_req_o                   <= `True_v;
             mem_addr_o                  <= branch_addr_i;
             pc_reg                      <= branch_addr_i;
             state                       <= 5'b00001;
+            count_total                 <= count_total + 1;
         end
     end else begin
         case (state)
@@ -91,10 +97,13 @@ always @ (posedge clk) begin
                         pc_o                        <= pc_reg;
                         pc_reg                      <= pc_reg + 4;
                         state                       <= 5'b00000;
+                        count_hit                   <= count_hit + 1;
+                        count_total                 <= count_total + 1;
                     end else begin
                         mem_req_o                   <= `True_v;
                         mem_addr_o                  <= pc_reg;
                         state                       <= 5'b00001;
+                        count_total                 <= count_total + 1;
                     end
                 end
             end
