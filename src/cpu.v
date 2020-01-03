@@ -126,6 +126,14 @@ wire[`CacheDataBus] cache_write_data;
 wire                cache_cache_hit;
 wire[`CacheDataBus] cache_cache_data;
 
+wire[`InstAddrBus]    d_cache_read_addr;
+wire                  d_cache_write_bit;
+wire[`Func3Bus]       d_cache_write_type;
+wire[`InstAddrBus]    d_cache_write_addr;
+wire[`CacheOneDataBus]d_cache_write_data;
+wire                  d_cache_cache_hit;
+wire[`CacheDataBus]   d_cache_cache_data;
+
 stage_if stage_if_a(
   .rst(rst_in),
   .clk(clk_in),
@@ -328,9 +336,30 @@ stage_mem stage_mem_a(
   .mem_req_o(mcu_mem_require),
   .mem_write_enable_o(mcu_mem_write_enable),
   .mem_addr_o(mcu_mem_addr),
-  .mem_data_o(mcu_mem_data)
+  .mem_data_o(mcu_mem_data),
+
+  .read_addr(d_cache_read_addr),
+  .write_bit(d_cache_write_bit),
+  .write_type(d_cache_write_type),
+  .write_addr(d_cache_write_addr),
+  .write_data(d_cache_write_data),
+  .cache_hit(d_cache_cache_hit),
+  .cache_data(d_cache_cache_data)
 );
 
+
+d_cache d_cache_a(
+    .rst(rst_in),
+    .clk(clk_in),
+
+    .read_addr(d_cache_read_addr),
+    .write_bit(d_cache_write_bit),
+    .write_type(d_cache_write_type),
+    .write_addr(d_cache_write_addr),
+    .write_data(d_cache_write_data),
+    .cache_hit(d_cache_cache_hit),
+    .cache_data(d_cache_cache_data)
+);
 
 mcu mcu_a(
   .rst(rst_in),

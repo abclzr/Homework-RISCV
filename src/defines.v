@@ -17,12 +17,16 @@
 `define ZeroCacheData           32'h00000000
 `define ZeroCacheTag            9'b000000000
 `define ZeroCacheIndex          6'b000000
+`define CacheOffsetBus          1:0
 `define CacheDataBus            31:0
+`define CacheOneDataBus         7:0
 `define CacheIndexBus           5:0
 `define CacheTagBus             8:0
+`define getCacheOffset          1:0
 `define getCacheIndex           7:2
 `define getCacheTag             16:8
-
+`define getCacheUpper           31:17
+`define ZeroUpper               15'b000000000000000
 // bus
 `define InstAddrBus             31:0
 `define InstBus                 31:0

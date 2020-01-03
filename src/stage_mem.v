@@ -25,7 +25,16 @@ module stage_mem(
     output reg                  mem_req_o,
     output reg                  mem_write_enable_o,
     output reg[`InstAddrBus]    mem_addr_o,
-    output reg[`DataBus]        mem_data_o
+    output reg[`DataBus]        mem_data_o,
+
+    
+    output reg[`InstAddrBus]    read_addr,
+    output reg                  write_bit,
+    output reg[`Func3Bus]       write_type,
+    output reg[`InstAddrBus]    write_addr,
+    output reg[`CacheOneDataBus]write_data,
+    input wire                  cache_hit,
+    input wire[`CacheDataBus]   cache_data
 );
 
 reg mem_check_busy;
@@ -68,15 +77,26 @@ reg[`RegBus] all_data;
             mem_write_enable_o      <= `False_v;
             mem_addr_o              <= `ZeroWord;
             mem_data_o              <= `ZeroByte;
+            read_addr               <= `ZeroWord;
+            write_bit               <= `False_v;
+            write_type              <= 3'b000;
+            write_addr              <= `ZeroWord;
+            write_data              <= `ZeroByte;
         end else if (mem_req_o) begin
             case (state)
                 3'b000: begin
                     mem_check_busy          <= `True_v;
                     mem_addr_o              <= mem_addr_i;
                     if (opcode_i == `L_OP) begin
+                        read_addr               <= mem_addr_i;
+                        write_bit               <= `False_v;
                         mem_write_enable_o      <= `False_v;
                         state                   <= 3'b001;
                     end else if (opcode_i == `S_OP) begin
+                        write_bit               <= `True_v;
+                        write_type              <= func3_i;
+                        write_addr              <= mem_addr_i;
+                        write_data              <= wdata_i[7:0];
                         mem_write_enable_o      <= `True_v;
                         mem_data_o              <= wdata_i[7:0];
                         state                   <= 3'b001;
@@ -84,24 +104,50 @@ reg[`RegBus] all_data;
                 end
                 3'b001: begin
                     if (opcode_i == `L_OP) begin
-                        case (func3_i)
-                            `LB_FUNC3, `LBU_FUNC3: begin
-                                state                   <= 3'b010;
-                            end
-                            `LH_FUNC3, `LHU_FUNC3, `LW_FUNC3: begin
-                                mem_addr_o              <= mem_addr_i + 1;
-                                state                   <= 3'b010;
-                            end
-                        endcase
+                        if (cache_hit) begin
+                            state                   <= 3'b000;
+                            mem_check_busy          <= `False_v;
+                            mem_addr_o              <= `ZeroWord;
+                            case (func3_i)
+                                `LB_FUNC3 : begin
+                                    all_data                <= {{24{cache_data[7]}}, cache_data[7:0]};
+                                end
+                                `LBU_FUNC3 : begin
+                                    all_data                <= {24'b0, cache_data[7:0]};
+                                end
+                                `LH_FUNC3 : begin
+                                    all_data                <= {{16{cache_data[15]}}, cache_data[15:0]};
+                                end
+                                `LHU_FUNC3 : begin
+                                    all_data                <= {16'b0, cache_data[15:0]};
+                                end
+                                `LW_FUNC3 : begin
+                                    all_data                <= cache_data;
+                                end
+                            endcase
+                        end else begin
+                            case (func3_i)
+                                `LB_FUNC3, `LBU_FUNC3: begin
+                                    state                   <= 3'b010;
+                                end
+                                `LH_FUNC3, `LHU_FUNC3, `LW_FUNC3: begin
+                                    mem_addr_o              <= mem_addr_i + 1;
+                                    state                   <= 3'b010;
+                                end
+                            endcase
+                        end
                     end else if (opcode_i == `S_OP) begin
                         case (func3_i)
                             `SB_FUNC3: begin
+                                write_bit               <= `False_v;
                                 mem_write_enable_o      <= `False_v;
                                 mem_check_busy          <= `False_v;
                                 mem_addr_o              <= `ZeroWord;
                                 state                   <= 3'b000;
                             end
                             `SH_FUNC3, `SW_FUNC3: begin
+                                write_addr              <= mem_addr_i + 1;
+                                write_data              <= wdata_i[15:8];
                                 mem_addr_o              <= mem_addr_i + 1;
                                 mem_data_o              <= wdata_i[15:8];
                                 state                   <= 3'b010;
@@ -137,12 +183,15 @@ reg[`RegBus] all_data;
                     end else if (opcode_i == `S_OP) begin
                         case (func3_i)
                             `SH_FUNC3: begin
+                                write_bit               <= `False_v;
                                 mem_write_enable_o      <= `False_v;
                                 mem_check_busy          <= `False_v;
                                 mem_addr_o              <= `ZeroWord;
                                 state                   <= 3'b000;
                             end
                             `SW_FUNC3: begin
+                                write_addr              <= mem_addr_i + 2;
+                                write_data              <= wdata_i[23:16];
                                 mem_addr_o              <= mem_addr_i + 2;
                                 mem_data_o              <= wdata_i[23:16];
                                 state                   <= 3'b011;
@@ -174,6 +223,8 @@ reg[`RegBus] all_data;
                     end else if (opcode_i == `S_OP) begin
                         case (func3_i)
                             `SW_FUNC3: begin
+                                write_addr              <= mem_addr_i + 3;
+                                write_data              <= wdata_i[31:24];
                                 mem_addr_o              <= mem_addr_i + 3;
                                 mem_data_o              <= wdata_i[31:24];
                                 state                   <= 3'b100;
@@ -192,6 +243,7 @@ reg[`RegBus] all_data;
                     end else if (opcode_i == `S_OP) begin
                         case (func3_i)
                             `SW_FUNC3: begin
+                                write_bit               <= `False_v;
                                 mem_write_enable_o      <= `False_v;
                                 mem_check_busy          <= `False_v;
                                 mem_addr_o              <= `ZeroWord;
@@ -211,6 +263,7 @@ reg[`RegBus] all_data;
             endcase
         end else begin
             mem_check_busy          <= `True_v;
+            write_bit               <= `False_v;
         end
     end
 
