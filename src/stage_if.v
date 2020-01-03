@@ -66,7 +66,7 @@ always @ (posedge clk) begin
         write_bit                   <= `False_v;
      end else if (branch_enable_i) begin
         write_bit                   <= `False_v;
-        if (`False_v) begin
+        if (cache_hit) begin
             mem_req_o                   <= `False_v;
             inst_o                      <= cache_data;
             pc_o                        <= branch_addr_i;
@@ -85,7 +85,7 @@ always @ (posedge clk) begin
                 if (stall[2]) begin
                     state                       <= 5'b00000;
                 end else begin
-                    if (`False_v) begin
+                    if (cache_hit) begin
                         mem_req_o                   <= `False_v;
                         inst_o                      <= cache_data;
                         pc_o                        <= pc_reg;
