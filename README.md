@@ -38,6 +38,8 @@
   
   - 对Store指令，要花5周期写入一个word。对Load指令，要花6周期读回一个word。如果cache hit，我们只要两周期就可以得到一个word。
   
+  - d_cache的写策略是write through & write-no-allocate。store指令往内存和d_cache同时写数据，只有write hit或者指令为sw才会写入d_cache。
+  
   - 在gcd的模拟测试中，一共有31次访问d_cache，hit次数为23次，miss rate为25.8%
 
 - mcu：stage_if和stage_mem的内存访问选择器
