@@ -10,7 +10,7 @@
 
 上板跑pi测试点的用时约为2.3s
 
-![architecture](./archiarchitecture.png)
+![architecture](https://github.com/abclzr/Homework-RISCV/blob/master/img/architecture.png)
 
 ## 2.模块说明
 
